@@ -81,3 +81,50 @@ def connectivity_threshold(self:Points, output_lnnl=False):
         else: # bfs done, component is a cluster; compute its distance to others 
             r = dm[component][:,~component].min()
     return r if not output_lnnl else (lnnl,r)
+
+# %% ../nbs/02_points.ipynb 17
+@patch
+def get_simplices(self:Points):
+    """
+    Returns a list of all the (d-1)-dimensional simplices
+    in the Cech complex with given Points and with radius r.
+    Or perhaps all the "valid" simplices, meaning that the unique point
+    in the (d-1)-dimensional hyperplace passing through all d vertices
+    which is equidistant to all d vertices
+    lies within the simplex itself.
+    If this condition isn't met then the set of points which are distance r
+    from each of the vertices is either empty or infinite.
+    For a valid simplex, on the other hand, there are exactly two such points.
+
+    It should also return the centre, and maybe the normal to the hyperplane passing through the d verticles
+    for each valid simplex in the list.
+    """
+    # First, we choose an r so that the union of balls of radius r/2 covers self.shape.
+    # When d=2 we have an upper bound which holds with very high probability
+    # that doesn't depend (to first order) on the geometry of the polytope,
+    # but in higher dimensions it will. (Penrose "Random Euclidean coverage from within", Thms 3.2 and 3.3)
+    # For d>3 we don't even have a formula for the first-order term, although I suspect it will be
+    # 2^d times the coverage threshold, for which we do have asymptotics.
+    # (Penrose, Yang, Higgs "Largest nearest-neighbour link and connectivity threshold in a polytopal random sample")
+    r = self.connectivity_threshold() * 4**self.d # This should hopefully be larger than the coverage threshold with very high probability.
+    # Get a list of edges
+    mask = self.distance_matrix < r
+    return {i: [j for j,v in enumerate(row) if v and j > i] for i,row in enumerate(mask)}
+    if self.d == 2:
+        # Every edge is valid, so this is simpler. We just need to return the midpoints and normals, but this is also simple.
+        pass
+    else:
+        pass
+
+# %% ../nbs/02_points.ipynb 21
+@patch
+def coverage_threshold(self:Points):
+    """
+    Finds the coverage threshold: the smallest r such that the union of balls of radius r
+    centred at self.points covers self.shape.
+    Uses the new method described above.
+    """
+    if self.d == 2:
+        pass
+    else:
+        pass
